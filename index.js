@@ -21,11 +21,20 @@ document.getElementById("blogPosts").addEventListener("submit", function(event) 
     event.preventDefault();
     const postTitle = document.getElementById("postTitle").value;
     const postBody = document.getElementById("postBody").value;
+
+    if (postTitle && postBody) {
     const data = {
         title: postTitle,
         body: postBody
     };
+
     appendNewPost(data);
+
+    document.getElementById("postTitle").value = '';
+    document.getElementById("postBody").value = '';
+    } else {
+        alert('Add a title and body to make a post!')
+    }
 })
 
 function appendNewPost(postData) {
@@ -39,11 +48,11 @@ function appendNewPost(postData) {
     
     fetch("https://apis.scrimba.com/jsonplaceholder/posts", options)
         .then(res => res.json())
-        .then(data => {
+        .then(post => {
             let html ='';
             html = `
-                <h3>${data.title}</h3>
-                <p>${data.body}</p>
+                <h3>${post.title}</h3>
+                <p>${post.body}</p>
                 <hr />
             `;
 
