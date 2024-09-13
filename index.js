@@ -1,66 +1,63 @@
+let postsArr = [];
+
+const titleInput = document.getElementById("postTitle");
+const bodyInput = document.getElementById("postBody");
+const formEl = document.getElementById("blogPosts");
+
+function renderPosts() {
+
+    let html = "";
+    for (let post of postsArr) {
+        html += `
+            <div class="post">
+                <h3>${post.title}</h3>
+                <p>${post.body}</p>
+                <hr />
+            </div>
+        `;
+    }
+
+    document.getElementById("blogList").innerHTML = html;
+}
+
 //renders posts from API and adds them to the page
 fetch("https://apis.scrimba.com/jsonplaceholder/posts")
     .then(res => res.json())
     .then(data => {
-        const postsArr = data.slice(0, 5);
-        let html = "";
-        for (let post of postsArr) {
-            html += `
-                <div class="post">
-                    <h3>${post.title}</h3>
-                    <p>${post.body}</p>
-                    <hr />
-                </div>
-            `;
-        }
-        document.getElementById("blogList").innerHTML = html;
+        postsArr = data.slice(0, 5);
+        renderPosts();
     })
 
-//Adds entered post to API and adds it to the top of the post list
-document.getElementById("blogPosts").addEventListener("submit", function(event) {
+//Adds entered post to API
+formEl.addEventListener("submit", function(event) {
     event.preventDefault();
-    const postTitle = document.getElementById("postTitle").value;
-    const postBody = document.getElementById("postBody").value;
+
+    const postTitle = titleInput.value;
+    const postBody = bodyInput.value;
 
     if (postTitle && postBody) {
-    const data = {
-        title: postTitle,
-        body: postBody
-    };
+        const data = {
+            title: postTitle,
+            body: postBody
+        };
 
-    appendNewPost(data);
+        const options = {
+            method: "POST",
+            body: JSON.stringify(data),
+            headers: {
+                "Content-Type": "application/json"
+            }
+        }
+        
+        fetch("https://apis.scrimba.com/jsonplaceholder/posts", options)
+            .then(response => response.json())
+            .then(post => {
+                postsArr.unshift(post);
+                renderPosts();
+            });
 
-    document.getElementById("postTitle").value = '';
-    document.getElementById("postBody").value = '';
+            formEl.reset();
     } else {
         alert('Add a title and body to make a post!')
     }
 })
-
-function appendNewPost(postData) {
-    const options = {
-        method: "POST",
-        body: JSON.stringify(postData),
-        headers: {
-            "Content-Type": "application/json"
-        }
-    }
-    
-    fetch("https://apis.scrimba.com/jsonplaceholder/posts", options)
-        .then(res => res.json())
-        .then(post => {
-            let html ='';
-            html = `
-                <h3>${post.title}</h3>
-                <p>${post.body}</p>
-                <hr />
-            `;
-
-            const newPost = document.createElement('div');
-            newPost.classList.add('post');
-
-            newPost.innerHTML = html;
-            document.getElementById('blogList').appendChild(newPost);
-            document.getElementById('blogList').insertBefore(newPost, document.getElementById('blogList').firstChild);
-        })
-}
